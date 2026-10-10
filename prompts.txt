@@ -1,0 +1,10 @@
+PROMPTS USED
+
+Question 1 (Denoising Autoencoder)
+- "I have added Assignment 2 which is to be done" – implement Q1: BSDS300 loading and splits, Gaussian and salt-and-pepper noise, convolutional DAE with configurable bottleneck, MSE training, MSE/PSNR/SSIM evaluation with visualisations, and experiments over noise levels and bottleneck sizes (Colab-ready notebook).
+
+Question 2 (CycleGAN)
+- Same request – implement CycleGAN for the Person Face Sketches dataset with per-epoch checkpointing and resume, plus a Flask UI that accepts an upload or camera image, auto-detects sketch vs. real face, and converts it.
+
+Other
+- "push the changes to https://github.com/HamasNaveed/Gen-AI-Assignment2" (no co-author attribution).

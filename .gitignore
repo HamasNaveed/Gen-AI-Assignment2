@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+data/
+*.pth
+*.tgz
+~$*
+.ipynb_checkpoints/
+app/weights/*
+!app/weights/.gitkeep
