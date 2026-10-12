@@ -1,0 +1,52 @@
+PROMPTS USED (step by step, per question)
+
+==================================================
+QUESTION 1: Image Denoising using a Denoising Autoencoder
+==================================================
+
+Prompt 1 - Data preparation
+"Write PyTorch code for Google Colab that downloads the Berkeley Segmentation Dataset (BSDS300), loads the train and test images, resizes them to 128x128 RGB, normalises pixel values to [0, 1], and splits the 200 training images into 160 training and 40 validation images with a fixed random seed. The 100 test images stay as the test set. Print the tensor shapes."
+
+Prompt 2 - Noise injection
+"Add two functions that corrupt a batch of images in [0, 1]: (a) additive Gaussian noise with a configurable standard deviation, clipped to [0, 1], and (b) salt-and-pepper noise where a configurable fraction of pixels is set to 0 or 1 with equal probability. Both must work on GPU tensors, and noise must be regenerated for every batch during training."
+
+Prompt 3 - Model architecture
+"Design a convolutional denoising autoencoder for 3x128x128 inputs. The encoder should use stride-2 convolutions with BatchNorm and ReLU, followed by a 1x1 convolution that sets the bottleneck channel count as a constructor argument. The decoder should mirror it with transposed convolutions and end with a Sigmoid. Explain the architecture, the bottleneck size and the activation functions, and print the parameter count and latent shape."
+
+Prompt 4 - Training and evaluation
+"Write a training function that corrupts each batch on the fly, trains with MSE loss and Adam, reduces the learning rate on validation plateau, keeps the best validation checkpoint and records loss curves. Then write evaluation code computing MSE, PSNR and SSIM on the test set (also for the noisy input as a baseline), and a function that plots original / noisy / denoised images for the first test images."
+
+Prompt 5 - Experimental study
+"Run an experimental study: (a) train one model per noise level (0.05, 0.1, 0.2, 0.3) for both noise types and report test MSE/PSNR/SSIM; (b) train with different bottleneck channel counts (2, 4, 8, 16, 32, 64) at noise 0.1. Collect results into pandas tables, save CSV files, and plot PSNR versus noise level and PSNR versus latent size."
+
+Prompt 6 - Interpretation
+"Based on these result tables, help me write the observations: how performance changes with noise level, how it compares with the noisy-input baseline, how bottleneck size affects quality, and what the limitations of the experiment are."
+
+==================================================
+QUESTION 2: CycleGAN for Person Face Sketches
+==================================================
+
+Prompt 1 - Dataset
+"Write Colab code that downloads the Kaggle 'Person Face Sketches' dataset using the Kaggle API (kaggle.json upload), finds the photo and sketch images recursively by folder name, and builds an unpaired PyTorch Dataset with resize, random crop, random flip and normalisation to [-1, 1]. Include an option to subsample the dataset per domain to save memory."
+
+Prompt 2 - Networks
+"Implement the CycleGAN networks from the original paper in PyTorch: a ResNet-based generator (7x7 conv, two downsampling convs, residual blocks, two upsampling layers, Tanh output, instance norm, reflection padding) and a 70x70 PatchGAN discriminator, with N(0, 0.02) weight initialisation. Put them in a separate models.py that a Flask app can import later."
+
+Prompt 3 - Losses and training loop
+"Write the CycleGAN training loop with two generators and two discriminators: LSGAN adversarial loss, cycle-consistency loss (lambda 10), identity loss (lambda 5), an image history pool of 50, Adam with lr 2e-4 and beta1 0.5, and a learning-rate schedule that is constant for half the epochs and then decays linearly. Log the average losses every epoch."
+
+Prompt 4 - Checkpointing and resume
+"Modify the training so the complete state (generators, discriminators, optimisers, schedulers, loss history, epoch) is saved to Google Drive after every epoch using an atomic write, plus standalone generator weights. At start-up the notebook must detect an existing checkpoint and resume from the last saved epoch instead of restarting."
+
+Prompt 5 - Testing and speeding up
+"Add a function that shows face -> sketch -> reconstructed face and sketch -> face -> reconstructed sketch on held-out images. My epochs take too long on Colab, so tell me which settings (images per domain, image size, residual blocks, batch size, epochs) to reduce, and what must be changed in the Flask app to match."
+
+Prompt 6 - Flask user interface
+"Create a simple Flask web app that loads the two trained generators and lets the user upload a picture or capture one from the webcam. It must automatically detect whether the image is a sketch or a real face and apply the correct generator, show input and output side by side, offer a manual override, and return clear error messages if weights are missing or the image is invalid."
+
+==================================================
+REPORT AND SUBMISSION
+==================================================
+
+Prompt 1 - "Extract the figures and result tables from my executed notebooks and write the assignment report covering dataset, architecture, training setup, results, experimental study, observations and limitations for both questions."
+Prompt 2 - "Package the executed notebooks, the report and this prompts file into one submission folder."

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Face ⇄ Sketch CycleGAN</title>
+<style>
+  body{font-family:system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem;background:#f5f6fa;color:#222}
+  h1{margin-bottom:.2rem} .sub{color:#666;margin-top:0}
+  .card{background:#fff;border-radius:10px;padding:1rem 1.2rem;box-shadow:0 1px 4px #0002;margin:1rem 0}
+  button,select{padding:.5rem .9rem;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:1rem}
+  button.primary{background:#3b6df0;color:#fff;border-color:#3b6df0}
+  .row{display:flex;gap:1rem;flex-wrap:wrap} .col{flex:1;min-width:250px;text-align:center}
+  img,video,canvas{max-width:100%;border-radius:8px;background:#eee;min-height:120px}
+  #status{min-height:1.5rem;color:#b00}
+</style>
+</head>
+<body>
+<h1>Face ⇄ Sketch</h1>
+<p class="sub">CycleGAN demo: upload a picture or use your camera. The app detects whether it is a sketch or a real face and converts it.</p>
+
+<div class="card">
+  <input type="file" id="file" accept="image/*">
+  <button id="camBtn">Use camera</button>
+  <button id="snapBtn" style="display:none">Capture</button>
+  <label>Input type: <select id="mode"><option value="auto">Auto-detect</option><option value="face">Face</option><option value="sketch">Sketch</option></select></label>
+  <button class="primary" id="go">Convert</button>
+  <video id="video" autoplay playsinline style="display:none;margin-top:1rem"></video>
+  <p id="status"></p>
+</div>
+
+<div class="card row">
+  <div class="col"><h3>Input</h3><img id="inp" alt=""></div>
+  <div class="col"><h3 id="outTitle">Result</h3><img id="out" alt=""></div>
+</div>
+
+<script>
+let blob = null, stream = null;
+const $ = id => document.getElementById(id);
+const setInput = b => { blob = b; $('inp').src = URL.createObjectURL(b); $('out').removeAttribute('src'); $('outTitle').textContent = 'Result'; };
+
+$('file').onchange = e => { if (e.target.files[0]) setInput(e.target.files[0]); };
+
+$('camBtn').onclick = async () => {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({video: true});
+    $('video').srcObject = stream; $('video').style.display = 'block'; $('snapBtn').style.display = 'inline';
+  } catch (err) { $('status').textContent = 'Camera unavailable: ' + err.message; }
+};
+
+$('snapBtn').onclick = () => {
+  const v = $('video'), c = document.createElement('canvas');
+  c.width = v.videoWidth; c.height = v.videoHeight; c.getContext('2d').drawImage(v, 0, 0);
+  c.toBlob(b => { setInput(b); stream.getTracks().forEach(t => t.stop()); v.style.display = 'none'; $('snapBtn').style.display = 'none'; }, 'image/jpeg', 0.95);
+};
+
+$('go').onclick = async () => {
+  if (!blob) { $('status').textContent = 'Choose or capture an image first.'; return; }
+  $('status').textContent = 'Converting…';
+  const fd = new FormData(); fd.append('image', blob, 'input.jpg'); fd.append('mode', $('mode').value);
+  try {
+    const r = await fetch('/convert', {method: 'POST', body: fd}), j = await r.json();
+    if (!r.ok) throw new Error(j.error);
+    $('out').src = j.result;
+    $('outTitle').textContent = j.detected === 'sketch' ? 'Detected sketch → generated face' : 'Detected face → generated sketch';
+    $('status').textContent = '';
+  } catch (err) { $('status').textContent = err.message; }
+};
+</script>
+</body>
+</html>
